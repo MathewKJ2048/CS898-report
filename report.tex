@@ -22,7 +22,7 @@
 
 % -----------------------------------------------------------------------------
 
-\title{Simulating Digital Circuits Using Wang Cubes}
+\title{Simulating Digital Circuits Using Wang Cubes [under construction]}
 
 \author{Mathew Kuthur James\textsuperscript{1}
 \vspace{10pt}\\
@@ -52,6 +52,65 @@ This report describes a method by which Wang cubes tiling 3D space can be used t
 % author really needs to refer to sections by number within the paper's text.  
 % So to suppress sequential section numbers, append an asterisk to 
 % the \section command, as in:
+
+
+\section*{Architecture}
+
+\begin{figure}[h!tbp]
+	\centering
+	\includegraphics[width=6.4in]{figures/class-diagram.png}
+	\caption{A UML class diagram describing the ontology underlying the system}
+	\label{fig:1}
+\end{figure}
+
+A "tile type" refers to an entity that describes the adjacency rules which determine the legality of a tiling. A tile is a combination of a tile type with a position vector (a vector being a 2-tuple of real numbers). All tiles have positions which are aligned with the grid - each number in the 2-tuple is an integer.
+
+A tiling is a collection of tiles in the x-y plane. The function mapping the tiles in a plane tiling to the set of tile types is surjective, but not necessarily injective. The function mapping the tiles in a tiling to the set of all possible positions is surjective, and not injective (since there are an infinite possible number of positions, and the number of tiles is finite).
+
+
+Instead of using colors, the adjacency rules for tiles are enforced using strings. A significant advantage of using unicode strings instead of RGB 3-tuples is that a string is self-documenting. Another advantage is that strings are easy to tell apart from each other, unlike close shades of colors. Furthermore, the system is designed such that one can use it even if completely color-blind, albeit not as efficiently as if one can perceive colors perfectly.
+
+A Wang file consists of a global set of tile types, a main tiling (on which most of the work is done), a cached tiling (used to implement resets while editing), a collection of sub tilings (which can be copied from and pasted into the main plane tiling) and a global color map that maps strings to colors. 
+
+The entire state of the data is stored in the Wang file, and the Wang file can be exported and imported via JSON serialization. This process presents the following challenges:
+
+
+\begin{itemize}
+	\item JSON objects do not preserve references, so if multiple tiles have references to the same tile type object, deserialization creates two distinct but identical tile type objects. This is resolved using a readonly static UID associated with the tile type class, which is used to collapse references to identical tile types into a single object. 
+	\item JSON objects carry only data and do not record non-static functions. This is resolved by replacing all non-static functions with static functions bound to the class, that takes an additional argument in place of "this" that the non-static function operates on.
+	
+\end{itemize}
+
+\section*{Technology}
+
+The software was designed to be a web-app, since this would allow it to be used by anyone with a browser. This also saves a lot of developer effort that would otherwise be spent in packaging the software for various operating systems and platforms.
+
+The following technology was used in the web-app:
+
+\begin{itemize}
+	\item HTML5, which is the industry standard for web development, used for the high-level structure of the web-app
+	\item NPM (Node package manager), used to install and maintain dependencies
+	\item SASS (Syntactically Awesome StyleSheets), which is a superset of CSS with additional syntactic sugar, used for styling the elements of the web-app
+	\item TypeScript, which is a superset of JavaScript with a typing system, used for the describing the algorithms, data structures and UI interactions of the web-app
+	\item 3js, a package used to render objects in 3D using a WebGL context, without having to write any WebGL code directly
+	\item Vite, used to manage the compilation to CSS/JavaScript, minification, tree-shaking and bundling the web-app into a small, portable form
+	\item Vitepress, a static site generator used to generate the user manual from markdown source files
+	\item GitHub actions, used as a CI/CD solution to build and publish the web-app incrementally
+	\item GitHub pages, used to host the web-app online
+\end{itemize}
+
+In addition, the icons for the web-app were sourced from Google Material icons, downloaded as SVG images.
+
+
+\section*{LLM disclosure}
+
+No LLMs were used in the generation of this report or the user manual for the web-app. However, when writing the code for the web-app, the involvement of LLMs is difficult to quantify and disentangle from the code written by a human, for the following reasons:
+
+\begin{itemize}
+	\item Development often involves copying and pasting code from online forums such as StackOverflow. The source of the content on such forums cannot be guaranteed to be written by a human, unless accompanied with a timestamp preceding the release of popular LLMs like ChatGPT.
+	\item Since search engines integrate AI assistance with their service, searching for a topic results in the user being exposed to an AI-generated answer that appears before every search result. This could subtly influence the thought-process of the user, guiding them toward certain implementations and solutions.
+	\item Popular code-editors like Copilot now integrate agentic coding assistants powered by LLMs, which autocomplete code snippets and generate functions from comments. Though no such editor has been used in the development of this web-app, it is often the case that the coder does not have direct control over what editor they are allowed to use.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Some Guide on Content}
