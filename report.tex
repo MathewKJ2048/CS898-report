@@ -53,6 +53,12 @@ This report describes a method by which Wang cubes tiling 3D space can be used t
 % So to suppress sequential section numbers, append an asterisk to 
 % the \section command, as in:
 
+\section*{Introduction}
+
+The primary goal of this project is to develop software to design and tile $R^3$ with Wang cubes, which are the 3D analogue for Wang tiles. Since 2D Wang tiles are Turing-complete, 3D Wang tiles possesses the expressive power required to simulate a Von Neumann machine built out of simple circuit elements like clocks, wires, logic-gates and flip-flops. 
+
+Movement along the z-axis is treated as equivalent to stepping forward and backward in time, which is treated as a distinct quantity. At each stage, the current plane contains a finite number of tiles, which are used to compute the preceding and succeeding plane in real time. The algorithm to do so is described in this report. A user manual \cite{manual}, the web-app \cite{web-app}, its source \cite{web-app-source} and files describing common circuit elements \cite{wang-file} are available online.
+
 
 \section*{Architecture}
 
@@ -72,7 +78,7 @@ Instead of using colors, the adjacency rules for tiles are enforced using string
 
 A Wang file consists of a global set of tile types, a main tiling (on which most of the work is done), a cached tiling (used to implement resets while editing), a collection of sub tilings (which can be copied from and pasted into the main plane tiling) and a global color map that maps strings to colors. 
 
-The entire state of the data is stored in the Wang file, and the Wang file can be exported and imported via JSON serialization. This process presents the following challenges:
+The entire state of the data is stored in the Wang file, and the Wang file can be exported and imported via JSON \cite{json} serialization. This process presents the following challenges:
 
 
 \begin{itemize}
@@ -85,21 +91,28 @@ The entire state of the data is stored in the Wang file, and the Wang file can b
 
 The software was designed to be a web-app, since this would allow it to be used by anyone with a browser. This also saves a lot of developer effort that would otherwise be spent in packaging the software for various operating systems and platforms.
 
+\begin{figure}[h!tbp]
+	\centering
+	\includegraphics[width=6.4in]{figures/pipeline.png}
+	\caption{The build pipeline, from the source files to the bundle}
+	\label{fig:2}
+\end{figure}
+
 The following technology was used in the web-app:
 
 \begin{itemize}
-	\item HTML5, which is the industry standard for web development, used for the high-level structure of the web-app
-	\item NPM (Node package manager), used to install and maintain dependencies
-	\item SASS (Syntactically Awesome StyleSheets), which is a superset of CSS with additional syntactic sugar, used for styling the elements of the web-app
-	\item TypeScript, which is a superset of JavaScript with a typing system, used for the describing the algorithms, data structures and UI interactions of the web-app
-	\item 3js, a package used to render objects in 3D using a WebGL context, without having to write any WebGL code directly
-	\item Vite, used to manage the compilation to CSS/JavaScript, minification, tree-shaking and bundling the web-app into a small, portable form
-	\item Vitepress, a static site generator used to generate the user manual from markdown source files
+	\item HTML5 \cite{HTML5}, which is the industry standard for web development, used for the high-level structure of the web-app
+	\item NPM \cite{npm} (Node package manager), used to install and maintain dependencies
+	\item SASS \cite{sass} (Syntactically Awesome StyleSheets), which is a superset of CSS with additional syntactic sugar, used for styling the elements of the web-app
+	\item TypeScript \cite{typescript}, which is a superset of JavaScript with a typing system, used for the describing the algorithms, data structures and UI interactions of the web-app
+	\item three.js \cite{3js}, a package used to render objects in 3D using a WebGL context, without having to write any WebGL code directly
+	\item Vite \cite{vite}, used to manage the compilation to CSS/JavaScript, minification \cite{minification}, tree-shaking \cite{tree} and bundling the web-app into a small, portable form
+	\item Vitepress \cite{vitepress}, a static site generator \cite{ssg} used to generate the user manual from markdown \cite{markdown} source files
 	\item GitHub actions, used as a CI/CD solution to build and publish the web-app incrementally
 	\item GitHub pages, used to host the web-app online
 \end{itemize}
 
-In addition, the icons for the web-app were sourced from Google Material icons, downloaded as SVG images.
+In addition, the icons for the web-app were sourced from Google Material \cite{google-material} icons, downloaded as SVG images.
 
 
 \section*{LLM disclosure}
@@ -110,6 +123,34 @@ No LLMs were used in the generation of this report or the user manual for the we
 	\item Development often involves copying and pasting code from online forums such as StackOverflow. The source of the content on such forums cannot be guaranteed to be written by a human, unless accompanied with a timestamp preceding the release of popular LLMs like ChatGPT.
 	\item Since search engines integrate AI assistance with their service, searching for a topic results in the user being exposed to an AI-generated answer that appears before every search result. This could subtly influence the thought-process of the user, guiding them toward certain implementations and solutions.
 	\item Popular code-editors like Copilot now integrate agentic coding assistants powered by LLMs, which autocomplete code snippets and generate functions from comments. Though no such editor has been used in the development of this web-app, it is often the case that the coder does not have direct control over what editor they are allowed to use.
+\end{itemize}
+
+\section*{Algorithm}
+
+\section*{Results}
+
+A reference implementation for a two-state standalone clock is described below:
+
+\section*{Future work}
+
+The following circuits can be added to the project:
+
+\begin{itemize}
+	\item D-flip-flops, constructed either as a standalone tile or from two D-latches. This requires a consistent translation of the notion of rising and falling edges to a system with discrete time, which requires research into variants of flip-flops
+	\item shift-registers, built from T-flip-flops. This allows one to build clocks of arbitrary frequencies without creating a large number of clock tiles to represent each state
+	\item Single-tile wires with more than two states, which can be used to transmit signals effectively, when coupled with multiplexers and demultiplexers
+	\item A 7-segment display, using a $3 x 5$ grid of screen tiles, with each tile having 10 states, though making 150 manually using the current UI is tedious
+\end{itemize}
+
+The following UI improvements can be made to the project:
+
+\begin{itemize}
+	\item An implementation of the pause/play functionality, which is currently left unimplemented due to difficulties involved with managing the animation framerate with the system clock (for security reasons, most browsers do not allow scripts to access the exact time on the system clock)
+	\item A custom console, to display errors and warnings at different levels of verbosity (at present, all such messages show up in the console provided with the developer tools of the browser)
+	\item An input console to allow the programmatic manipulation of the Wang file, to automate tedious tasks
+	\item Collapsible classes in the search results, making a tree-like structure that's easier to navigate than scrolling over all the results
+	\item A graphical representation of the illegality of the tiling (for instance, using red circles to point out areas where the adjacency rules are violated)
+	\item Integrating the main editor with three.js, allowing the user to manipulate the main tiling using orbit controls (currently unimplemented due to problems with mixing dynamic resizing with the WebGL API of three.js)
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -411,7 +452,41 @@ enhanced would be gladly accepted.
 % 2016, pp.~41--48. \url{http://archive.bridgesmathart.org/2016/bridges2016-41.html}.
 
 
+\bibitem{manual} User manual, GitHub pages. \url{https://mathewkj2048.github.io/Wang-cube-circuit-simulator-user-manual}
+
+\bibitem{web-app} Web app, GitHub pages. \url{https://mathewkj2048.github.io/Wang-cube-circuit-simulator/}
+
+\bibitem{web-app-source} Web app source code, GitHub \url{https://github.com/MathewKJ2048/Wang-cube-circuit-simulator}
+
+\bibitem{wang-file} Clocks, wires and logic gates, GitHub \url{https://github.com/MathewKJ2048/Wang-cube-circuit-simulator/tree/main/Wang-files}
+
 \bibitem{Merrel} Merrel, Paul. ``Example-based model synthesis'' \textit{Proceedings of the 2007 Symposium on Interactive 3D Graphics and Games}, 2007, pp.105--112 \url{https://doi.org/10.1145/1230100.1230119}
+
+\bibitem{tree} Tree-shaking, MDN web docs. \url{https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking}
+
+\bibitem{minification} Minification, MDN web docs. \url{https://developer.mozilla.org/en-US/docs/Glossary/Minification}
+
+\bibitem{HTML5} HTML5,  MDN web docs. \url{https://developer.mozilla.org/en-US/docs/Glossary/HTML5}
+
+\bibitem{sass} Documentation, sass-lang. \url{https://sass-lang.com/documentation/}
+
+\bibitem{typescript} TypeScript,  MDN web docs. \url{https://developer.mozilla.org/en-US/docs/Glossary/TypeScript}
+
+\bibitem{vite} Vite. \url{https://vite.dev/}
+
+\bibitem{ssg} Static Site Generator, MDN web docs. \url{https://developer.mozilla.org/en-US/docs/Glossary/SSG}
+
+\bibitem{npm} Node Package Manager. \url{https://docs.npmjs.com/about-npm}
+
+\bibitem{markdown} How to write in Markdown, MDN web docs. \url{https://developer.mozilla.org/en-US/docs/MDN/Writing_guidelines/Howto/Markdown_in_MDN}
+
+\bibitem{json} JavaScript Object Notation. \url{https://www.json.org/json-en.html}
+
+\bibitem{vitepress} Vitepress \url{https://vitepress.dev/}
+
+\bibitem{3js} three.js \url{https://threejs.org/}
+
+\bibitem{google-material} Google Material icons. \url{https://fonts.google.com/icons}
 
 
 
