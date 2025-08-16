@@ -87,6 +87,36 @@ The entire state of the data is stored in the Wang file, and the Wang file can b
 	
 \end{itemize}
 
+\section*{Algorithm}
+
+Given n tiles and m tile-types, a naïve backtracking algorithm operates with a time complexity of $O(m^n)$, which is unsuitable for Wang files which use many different tile types. Thus, a more efficient algorithm is used.
+
+The computation of the neighboring planes is done using PRUNE (Propagation and Reduction Using Neighborhood Elimination), which is a modification of the wave-function collapse algorithm \cite{Merrel}. PRUNE requires that the current plane can have exactly one possible adjacent plane. Tilings that are non-deterministic are not supported, and the exact point of where the non-determinism occurs is pointed out by PRUNE.
+
+The high-level idea behind PRUNE is:
+
+\begin{itemize}
+	\item Each tile has a set of possible tile types that its neighbor in the next plane can have.
+	\item Given a pair of tiles, the set of possible tile types of one tile can be reduced by considering the set of possible tile types of the other tile.
+	\item A pass consists of applying a reduction to every pair of adjacent tiles in the tiling.
+	\item PRUNE makes multiple passes, and terminates when a reduction-free pass is made.
+	\item If a pass does not allow any reductions to be made, no further passes result in any reductions (since none of the sets of possible tile types are changed, making the result of every subsequent pass the same)
+\end{itemize}
+
+An analysis of the algorithm's correctness and efficiency is presented below:
+
+\begin{itemize}
+	\item The maximum cardinality of the set of possible tile types is m.
+	\item Let $I$ be the sum of cardinalities of the set of possible tile types of every tile. Since there are n tiles, $I \leq mn$
+	\item Let $I_k$ be the value of $I$ at the $k^{\text{th}}$ pass.
+	\item Since no pass expands the possible tile types, $I_{k+1} \leq I_k$
+	\item If a pass does result in a reduction, at least one set of possible tile-types is reduced in size. Thus, $I_{k+1} < I_k$
+	\item Thus, the maximum number of passes before termination is $mn$. Since each pass takes $O(n)$ time, the overall complexity of the algorithm is $O(mn^2)$
+\end{itemize}
+
+Thus, PRUNE uses repeated passes and computes the plane in $O(mn^2)$ time, which is significantly faster than the naïve backtracking approach. However, since the data structures that store tiles do not store the neighbors of the tiles, generating a neighbor-graph requires $O(n^2)$ preprocessing time and $O(n)$ space, which is the overhead for the current implementation of PRUNE. Maintaining a live neighbor-graph with each edit allows the preprocessing time to disappear entirely, when amortization is accounted for.
+
+
 \section*{Technology}
 
 The software was designed to be a web-app, since this would allow it to be used by anyone with a browser. This also saves a lot of developer effort that would otherwise be spent in packaging the software for various operating systems and platforms.
@@ -114,8 +144,6 @@ The following technology was used in the web-app:
 
 In addition, the icons for the web-app were sourced from Google Material \cite{google-material} icons, downloaded as SVG images.
 
-
-\section*{Algorithm}
 
 \section*{Results}
 
